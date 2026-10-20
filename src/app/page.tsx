@@ -17,17 +17,16 @@ import {
   ProcessedImage,
   CompressionOptions,
   CompressionStats,
-  OutputFormat,
 } from "@/types";
 import { compressImage } from "@/lib/imageCompressor";
 import { getOutputFilename, downloadBlob } from "@/lib/utils";
 import { SampleImage } from "@/lib/sampleImages";
-import { Layers, Sparkles, SlidersHorizontal, Image as ImageIcon } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layers, SlidersHorizontal } from "lucide-react";
 
 const DEFAULT_OPTIONS: CompressionOptions = {
   preset: "hd-print",
   format: "original",
-  quality: 92,
+  quality: 95,
   resizeMode: "none",
   scalePercent: 100,
   maintainAspectRatio: true,
@@ -296,31 +295,31 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface-base text-slate-100">
-      {/* Sticky Header */}
+      {/* Sticky Top Header */}
       <Header onOpenPrintGuide={() => setIsPrintGuideOpen(true)} />
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      {/* Main Wide-Screen Content Container */}
+      <main className="flex-1 w-full max-w-[1800px] mx-auto px-4 sm:px-8 xl:px-12 2xl:px-16 py-8 sm:py-12">
         {/* Hero Section */}
-        <div className="text-center max-w-3xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-brand-500/10 border border-brand-500/25 text-brand-300 text-xs font-semibold mb-4 animate-in fade-in slide-in-from-top duration-300">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Next-Generation In-Browser Image Optimizer</span>
+        <div className="text-center max-w-4xl mx-auto mb-10 sm:mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-300 text-xs sm:text-sm font-semibold mb-4 shadow-sm animate-in fade-in duration-300">
+            <Sparkles className="w-4 h-4 text-brand-400" />
+            <span>Professional In-Browser Image Compression & Print Studio</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
-            The Best Image Compressor for{" "}
-            <span className="bg-gradient-to-r from-brand-400 via-cyan-400 to-indigo-300 bg-clip-text text-transparent">
-              Web & HD Print
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-5 leading-tight">
+            Compress Images with Precision.{" "}
+            <span className="bg-gradient-to-r from-brand-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent block sm:inline">
+              Download 300 DPI HD Print.
             </span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Shrink image file sizes by up to 85% without sacrificing quality. Download pristine 300 DPI print-ready photos or lightning-fast WebP & AVIF for modern web apps. 100% private in your browser.
+          <p className="text-sm sm:text-base lg:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            Lossless and lossy compression for WebP, AVIF, JPEG, and PNG. Inject 300 DPI tags for physical photo printing, specify exact target sizes, or inspect pixel clarity with our split-screen comparison slider.
           </p>
         </div>
 
-        {/* Compression Studio Settings */}
+        {/* Compression Configuration Studio */}
         <CompressionSettings
           options={options}
           onChange={setOptions}
@@ -329,7 +328,7 @@ export default function Home() {
           imageCount={images.length}
         />
 
-        {/* Master Dropzone */}
+        {/* Expansive Wide Dropzone */}
         <Dropzone
           onFilesSelected={handleFilesSelected}
           isLoadingSample={isLoadingSample}
@@ -347,20 +346,20 @@ export default function Home() {
           />
         </div>
 
-        {/* Queue of Images */}
+        {/* Image Queue List */}
         {images.length > 0 && (
-          <div className="mt-6 space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-brand-400" />
-                Processing Queue ({images.length})
+                Image Queue ({images.length})
               </h3>
-              <span className="text-xs text-slate-500">
-                Click Compare to inspect Before / After
+              <span className="text-xs text-slate-400">
+                Click <strong className="text-white">Compare Slider</strong> on any image to inspect fine pixel details
               </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {images.map((img) => (
                 <ImageCard
                   key={img.id}
@@ -375,17 +374,20 @@ export default function Home() {
           </div>
         )}
 
-        {/* Responsive Ad Banner */}
-        <AdPlaceholder className="mt-12" />
+        {/* AdSense Unit */}
+        <AdPlaceholder className="mt-14" />
 
-        {/* Features Grid */}
+        {/* Features & Architecture Grid */}
         <FeaturesSection />
 
-        {/* Frequently Asked Questions */}
+        {/* Dedicated AdSense Banner Unit (Mid/Bottom) */}
+        <AdPlaceholder slot="2000000002" className="mt-12 mb-6" />
+
+        {/* Comprehensive FAQ Section */}
         <FaqSection />
       </main>
 
-      {/* Comparison Modal */}
+      {/* Interactive Split Comparison Modal */}
       <ComparisonModal
         image={inspectImage}
         onClose={() => setInspectImage(null)}
