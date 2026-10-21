@@ -10,26 +10,30 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Compressor Pro — Best Image Compressor & 300 DPI HD Print Studio",
+  title: "ImagePro — Professional Image Compressor & Universal Format Converter",
   description:
-    "Compress images online with lossless & lossy algorithms, WebP, AVIF, JPEG, and PNG. Download HD 300 DPI print-ready photos. 100% private in-browser processing.",
+    "Compress and convert images online with 100% in-browser privacy. WebP, AVIF, JPEG, PNG, PDF, ICO & BMP. 300 DPI HD Print studio and batch ZIP downloads.",
   keywords: [
     "image compressor",
+    "image converter",
     "HD print 300 DPI",
-    "photo compressor",
+    "convert jpg to png",
+    "convert png to jpg",
+    "convert image to pdf",
+    "image to ico favicon",
     "WebP converter",
     "AVIF compressor",
     "batch image compressor",
     "reduce image file size",
-    "compress image without losing quality",
+    "client-side image converter",
   ],
   authors: [{ name: "abishek.in" }],
   openGraph: {
-    title: "Compressor Pro — Professional Image Compressor & 300 DPI HD Print",
+    title: "ImagePro — Professional Image Compressor & Universal Format Converter",
     description:
-      "Ultra-fast, 100% private client-side image compression with interactive before/after split slider, batch ZIP export, and 300 DPI print options.",
+      "Ultra-fast, 100% private client-side image compression and format conversion with before/after split slider, batch ZIP export, 300 DPI print options, and PDF merge.",
     url: "https://image.abishek.in",
-    siteName: "Compressor Pro",
+    siteName: "ImagePro",
     type: "website",
   },
 };

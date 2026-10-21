@@ -10,24 +10,28 @@ interface FaqItem {
 
 const FAQS: FaqItem[] = [
   {
-    q: "How does in-browser compression work and is my data private?",
-    a: "Unlike traditional online compressors that send your photos to remote servers, Compressor Pro uses client-side HTML5 Canvas and native browser encoders. Every byte of compression runs directly inside your computer or smartphone's browser. Your photos never leave your device, ensuring 100% privacy and zero upload waiting time.",
+    q: "How does in-browser image compression and conversion work?",
+    a: "Unlike traditional online tools that upload your private photos to remote servers, ImagePro uses client-side HTML5 Canvas, WebCodecs, and browser binary encoders. Every byte of compression and conversion runs locally inside your browser on your CPU/GPU. Your photos never leave your device, ensuring 100% privacy, zero data leaks, and lightning-fast speeds.",
   },
   {
-    q: "What makes HD Print Mode (300 DPI) suitable for photo printing?",
-    a: "Most web compressors strip image headers and save images at 72 DPI, causing photo print machines and desktop drivers to produce pixelated or blurry prints. Our HD Print preset retains high resolution, injects true 300 DPI metadata tags (JFIF for JPEG, pHYs for PNG), and applies an unsharp mask filter to counteract printer ink bleeding.",
+    q: "Which image formats can I convert between?",
+    a: "You can convert between JPG, PNG, WebP, AVIF, PDF, ICO, and BMP formats. You can also drag and drop SVG, GIF, and other browser-supported image formats to convert them into crisp modern web formats or documents.",
   },
   {
-    q: "Which format should I choose: WebP, AVIF, JPEG, or PNG?",
-    a: "For modern websites, WebP and AVIF offer 30-50% smaller sizes than JPEG with identical visual quality. For transparent graphics, logos, and screenshots, PNG or WebP is best. For universal compatibility, photo printing, and backwards compatibility with older operating systems, choose JPEG.",
+    q: "What happens to transparent backgrounds when converting PNG/WebP to JPG?",
+    a: "JPG does not support alpha channel transparency. When converting a transparent image (like a PNG logo) into JPG or BMP, our converter fills the transparent areas with your chosen background color (default is pure white, with options for black, custom colors, or light gray) so your graphics look natural without black pixel artifacts.",
   },
   {
-    q: "How does the 'Target File Size' mode work?",
-    a: "Many government portals, visa forms, and job application sites require images strictly under a specific limit (e.g., 200 KB or 500 KB). Our target size solver runs an intelligent binary search over the quality parameter, adjusting quantization and dimensions until the output meets your exact size threshold with the highest possible visual clarity.",
+    q: "Can I convert multiple images into a single PDF document?",
+    a: "Yes! When in Converter mode, you can upload multiple photos, receipts, or document scans, convert them to PDF, and click 'Merge into 1 PDF' to instantly generate and download a single multi-page PDF document.",
   },
   {
-    q: "Is there any limit on how many images I can compress?",
-    a: "No! Because processing is performed locally on your device rather than on our servers, there are no artificial quotas, subscription walls, or file-count caps. You can compress batches of dozens of photos simultaneously and download them in a single ZIP file.",
+    q: "How does HD Print Mode (300 DPI) work for photo printing?",
+    a: "Most web tools strip metadata and output images at 72 DPI, causing photo print machines and desktop printer drivers to produce pixelated prints. Our HD Print preset retains high resolution, injects true 300 DPI metadata tags (JFIF for JPEG, pHYs for PNG), and applies an unsharp mask filter to counteract ink bleed on photo paper.",
+  },
+  {
+    q: "Is there any limit on file sizes or how many images I can convert/compress?",
+    a: "No artificial limits! Because processing runs entirely on your device hardware, there are no subscription paywalls, hourly quotas, or file count caps. You can convert or compress batches of dozens of photos simultaneously and download them in a single organized ZIP file.",
   },
 ];
 
@@ -36,16 +40,16 @@ export const FaqSection: React.FC = () => {
 
   return (
     <section className="mt-16 pt-12 border-t border-surface-border/60">
-      <div className="text-center max-w-2xl mx-auto mb-10">
+      <div className="text-center max-w-3xl mx-auto mb-10">
         <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
           Frequently Asked Questions
         </h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-2">
-          Clear answers on image compression, print fidelity, and privacy.
+          Clear answers on image compression, format conversion, print fidelity, and privacy.
         </p>
       </div>
 
-      <div className="max-w-3xl mx-auto space-y-3">
+      <div className="max-w-5xl mx-auto space-y-3">
         {FAQS.map((faq, idx) => {
           const isOpen = openIdx === idx;
           return (

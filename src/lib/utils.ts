@@ -73,3 +73,119 @@ export function getPrintDimensions(
     cm: `${widthCm} × ${heightCm} cm`,
   };
 }
+
+/**
+ * Map MIME type to a short human-readable uppercase format label
+ */
+export function getFormatLabel(mime: string): string {
+  switch (mime) {
+    case "image/jpeg":
+    case "image/jpg":
+      return "JPG";
+    case "image/png":
+      return "PNG";
+    case "image/webp":
+      return "WEBP";
+    case "image/avif":
+      return "AVIF";
+    case "image/bmp":
+      return "BMP";
+    case "image/x-icon":
+    case "image/vnd.microsoft.icon":
+    case "image/ico":
+      return "ICO";
+    case "application/pdf":
+      return "PDF";
+    case "image/gif":
+      return "GIF";
+    case "image/svg+xml":
+      return "SVG";
+    default:
+      if (mime.startsWith("image/")) {
+        return mime.replace("image/", "").toUpperCase();
+      }
+      return mime.toUpperCase();
+  }
+}
+
+/**
+ * Get extension string for a target MIME type
+ */
+export function getExtensionForMime(mime: string): string {
+  switch (mime) {
+    case "image/jpeg":
+    case "image/jpg":
+      return "jpg";
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    case "image/avif":
+      return "avif";
+    case "image/bmp":
+      return "bmp";
+    case "image/x-icon":
+    case "image/vnd.microsoft.icon":
+    case "image/ico":
+      return "ico";
+    case "application/pdf":
+      return "pdf";
+    case "image/gif":
+      return "gif";
+    case "image/svg+xml":
+      return "svg";
+    default:
+      return "jpg";
+  }
+}
+
+/**
+ * Get converted output filename with the new extension
+ */
+export function getConvertedFilename(originalName: string, targetMime: string): string {
+  const lastDot = originalName.lastIndexOf(".");
+  const base = lastDot !== -1 ? originalName.substring(0, lastDot) : originalName;
+  const ext = getExtensionForMime(targetMime);
+  return `${base}.${ext}`;
+}
+
+/**
+ * Copy image blob to clipboard (when supported)
+ */
+export async function copyBlobToClipboard(blob: Blob): Promise<boolean> {
+  try {
+    if (!navigator.clipboard || !window.ClipboardItem) return false;
+    // Standard clipboard items usually require image/png
+    let pngBlob = blob;
+    if (blob.type !== "image/png") {
+      // Convert to PNG for clipboard compatibility
+      const img = new Image();
+      const url = URL.createObjectURL(blob);
+      img.src = url;
+      await new Promise((res, rej) => {
+        img.onload = () => res(true);
+        img.onerror = rej;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return false;
+      ctx.drawImage(img, 0, 0);
+      pngBlob = await new Promise<Blob>((res, rej) =>
+        canvas.toBlob((b) => (b ? res(b) : rej()), "image/png")
+      );
+      URL.revokeObjectURL(url);
+    }
+    await navigator.clipboard.write([
+      new window.ClipboardItem({
+        [pngBlob.type]: pngBlob,
+      }),
+    ]);
+    return true;
+  } catch (err) {
+    console.error("Clipboard copy failed:", err);
+    return false;
+  }
+}
+

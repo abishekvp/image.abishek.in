@@ -54,3 +54,70 @@ export interface CompressionStats {
   savedPercentage: number;
   processedCount: number;
 }
+
+// ==========================================
+// IMAGE CONVERTER TYPES
+// ==========================================
+
+export type ConvertFormat =
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/webp'
+  | 'image/avif'
+  | 'image/bmp'
+  | 'image/x-icon'
+  | 'application/pdf'
+  | 'image/gif';
+
+export type IcoSizeOption = 16 | 32 | 48 | 64 | 128 | 256 | 'multi';
+
+export interface ConvertOptions {
+  targetFormat: ConvertFormat;
+  quality: number; // 1 - 100 (for lossy formats: jpeg, webp, avif)
+  backgroundColor: string; // for jpeg / non-alpha target formats, e.g. '#FFFFFF'
+  icoSize: IcoSizeOption;
+  scalePercent: number; // 10 - 200
+  maintainAspectRatio: boolean;
+  maxWidth?: number;
+  maxHeight?: number;
+  pdfPageSize: 'fit' | 'a4' | 'letter';
+  pdfOrientation: 'auto' | 'portrait' | 'landscape';
+}
+
+export interface ConvertedImage {
+  id: string;
+  file: File;
+  name: string;
+  originalSize: number;
+  originalWidth: number;
+  originalHeight: number;
+  originalType: string;
+  originalUrl: string;
+
+  // Conversion target & options override
+  targetFormat: ConvertFormat;
+  customOptions?: Partial<ConvertOptions>;
+
+  // State
+  status: 'idle' | 'converting' | 'done' | 'error';
+  progress: number;
+  error?: string;
+
+  // Results
+  convertedBlob?: Blob;
+  convertedUrl?: string;
+  convertedSize?: number;
+  convertedWidth?: number;
+  convertedHeight?: number;
+  conversionTimeMs?: number;
+}
+
+export interface ConverterStats {
+  totalOriginalBytes: number;
+  totalConvertedBytes: number;
+  totalFiles: number;
+  convertedCount: number;
+}
+
+export type ActiveTool = 'compressor' | 'converter';
+

@@ -42,7 +42,7 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
       aria-label="Advertisement"
       className={`w-full overflow-hidden flex flex-col items-center justify-center my-8 ${className}`}
     >
-      <div className="w-full max-w-5xl rounded-xl border border-dashed border-surface-border/60 bg-surface-card/30 p-2.5 sm:p-4 flex flex-col items-center justify-center min-h-[100px] text-center transition-colors hover:border-surface-border">
+      <div className="w-full rounded-xl border border-dashed border-surface-border/60 bg-surface-card/30 p-2.5 sm:p-4 flex flex-col items-center justify-center min-h-[100px] text-center transition-colors hover:border-surface-border">
         {label && (
           <span className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2 select-none">
             {label}

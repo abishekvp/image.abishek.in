@@ -3,67 +3,59 @@ import {
   ShieldCheck,
   Printer,
   Zap,
-  Maximize2,
   FolderArchive,
-  SlidersHorizontal,
-  Cpu,
-  Layers,
+  RefreshCw,
+  FileText,
 } from "lucide-react";
 
 export const FeaturesSection: React.FC = () => {
   const features = [
     {
       icon: ShieldCheck,
-      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
       title: "100% In-Browser Privacy",
       description:
         "Your photos are processed entirely on your device using HTML5 Canvas & WebCodecs. Zero bytes are uploaded to any external server.",
     },
     {
+      icon: RefreshCw,
+      title: "Universal Format Converter",
+      description:
+        "Seamlessly convert between JPG, PNG, WebP, AVIF, PDF, ICO, and BMP with intelligent transparency background replacement and custom quality.",
+    },
+    {
       icon: Printer,
-      color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
       title: "HD Print Ready (300 DPI)",
       description:
         "Injects physical 300 DPI JFIF and PNG metadata with subtle unsharp masking for razor-sharp photo paper and canvas printing.",
     },
     {
-      icon: Zap,
-      color: "text-brand-400 bg-brand-500/10 border-brand-500/20",
-      title: "Next-Gen WebP & AVIF",
+      icon: FileText,
+      title: "Image to PDF & Multi-Merge",
       description:
-        "Convert bulky JPEGs and PNGs into modern WebP and AVIF formats, slashing file size by up to 85% while preserving visual clarity.",
+        "Convert single images or combine multiple photos into a neatly formatted, printable multi-page PDF document in seconds.",
     },
     {
-      icon: Maximize2,
-      color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
-      title: "Target Size Solver",
+      icon: Zap,
+      title: "Favicon & Windows ICO Creator",
       description:
-        "Need an image under 500 KB for a portal or visa application? Our binary search algorithm automatically dials in the exact quality.",
+        "Turn any square graphic or logo into a valid multi-size Windows icon (.ico) or website favicon with resolutions from 16px to 256px.",
     },
     {
       icon: FolderArchive,
-      color: "text-violet-400 bg-violet-500/10 border-violet-500/20",
-      title: "Batch ZIP Download",
+      title: "Parallel Batch Processing & ZIP",
       description:
-        "Drop 50+ photos at once. Compress them in parallel threads and download the entire collection in a neatly packed ZIP file.",
-    },
-    {
-      icon: SlidersHorizontal,
-      color: "text-rose-400 bg-rose-500/10 border-rose-500/20",
-      title: "Live Split Inspector",
-      description:
-        "Compare original and compressed images side-by-side with zoom up to 300% to inspect pixel sharpness, grain, and color fidelity.",
+        "Drop multiple photos at once. Compress or convert in parallel threads and download the entire collection in a neatly packed ZIP file.",
     },
   ];
 
   return (
-    <section className="mt-16 pt-12 border-t border-surface-border/60">
+    <section className="mt-16 pt-12 border-t border-surface-border">
       <div className="text-center max-w-2xl mx-auto mb-10">
         <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
           Engineered for Professionals & Creators
         </h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-2">
-          Everything you need for web optimization, photo archiving, and print reproduction.
+          Everything you need for web optimization, photo archiving, format conversion, and print reproduction.
         </p>
       </div>
 
@@ -73,12 +65,10 @@ export const FeaturesSection: React.FC = () => {
           return (
             <div
               key={idx}
-              className="p-5 rounded-2xl bg-surface-card border border-surface-border hover:border-surface-hover hover:bg-surface-card/90 transition-all flex flex-col justify-between"
+              className="p-5 rounded-xl bg-surface-card border border-surface-border hover:border-slate-500 transition-all flex flex-col justify-between"
             >
               <div>
-                <div
-                  className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-3.5 ${feat.color}`}
-                >
+                <div className="w-10 h-10 rounded-xl border border-surface-border bg-surface-subtle flex items-center justify-center mb-3.5 text-blue-400">
                   <Icon className="w-5 h-5" />
                 </div>
                 <h3 className="text-sm font-bold text-white mb-1.5">{feat.title}</h3>
