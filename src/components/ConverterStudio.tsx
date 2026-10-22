@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import JSZip from "jszip";
@@ -57,14 +57,19 @@ export const ConverterStudio: React.FC = () => {
   const [isLoadingSample, setIsLoadingSample] = useState(false);
 
   // Clean up object URLs on unmount
+  const imagesRef = useRef(images);
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
   useEffect(() => {
     return () => {
-      images.forEach((img) => {
+      imagesRef.current.forEach((img) => {
         if (img.originalUrl) URL.revokeObjectURL(img.originalUrl);
         if (img.convertedUrl) URL.revokeObjectURL(img.convertedUrl);
       });
     };
-  }, [images]);
+  }, []);
 
   // Compute aggregate converter statistics
   const stats: ConverterStats = useMemo(() => {
@@ -99,6 +104,9 @@ export const ConverterStudio: React.FC = () => {
         };
 
         const result = await convertImage(item.file, itemOptions, item.originalType);
+        if (item.convertedUrl) {
+          URL.revokeObjectURL(item.convertedUrl);
+        }
         const convUrl = URL.createObjectURL(result.blob);
 
         return {
@@ -315,6 +323,41 @@ export const ConverterStudio: React.FC = () => {
     }
   };
 
+  // Keep inspectImage in sync with images array if re-converted
+  const activeInspectImage = useMemo(() => {
+    if (!inspectImage) return null;
+    const current = images.find((i) => i.id === inspectImage.id);
+    if (!current) return inspectImage;
+    const ratio =
+      current.convertedSize && current.originalSize
+        ? Math.max(
+            0,
+            Math.round(
+              ((current.originalSize - current.convertedSize) / current.originalSize) * 100
+            )
+          )
+        : 0;
+    return {
+      id: current.id,
+      file: current.file,
+      name: current.name,
+      originalSize: current.originalSize,
+      originalWidth: current.originalWidth,
+      originalHeight: current.originalHeight,
+      originalType: current.originalType,
+      originalUrl: current.originalUrl,
+      status: current.status === "done" ? ("done" as const) : ("processing" as const),
+      progress: current.progress,
+      compressedBlob: current.convertedBlob,
+      compressedUrl: current.convertedUrl,
+      compressedSize: current.convertedSize,
+      compressedWidth: current.convertedWidth,
+      compressedHeight: current.convertedHeight,
+      compressionRatio: ratio,
+      processingTimeMs: current.conversionTimeMs,
+    };
+  }, [images, inspectImage]);
+
   return (
     <div className="min-h-screen flex flex-col bg-surface-base text-slate-100">
       <Header
@@ -526,7 +569,7 @@ export const ConverterStudio: React.FC = () => {
 
       {/* Comparison Modal */}
       <ComparisonModal
-        image={inspectImage}
+        image={activeInspectImage}
         onClose={() => setInspectImage(null)}
         targetMime={options.targetFormat}
         dpi={72}

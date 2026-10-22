@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import JSZip from "jszip";
 import { Header } from "@/components/Header";
@@ -71,14 +71,19 @@ export const CompressorStudio: React.FC = () => {
   }, []);
 
   // Clean up object URLs on unmount
+  const imagesRef = useRef(images);
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
   useEffect(() => {
     return () => {
-      images.forEach((img) => {
+      imagesRef.current.forEach((img) => {
         if (img.originalUrl) URL.revokeObjectURL(img.originalUrl);
         if (img.compressedUrl) URL.revokeObjectURL(img.compressedUrl);
       });
     };
-  }, [images]);
+  }, []);
 
   // Compute aggregate compression statistics
   const stats: CompressionStats = useMemo(() => {
@@ -111,6 +116,9 @@ export const CompressorStudio: React.FC = () => {
     async (item: ProcessedImage, currentOptions: CompressionOptions): Promise<ProcessedImage> => {
       try {
         const result = await compressImage(item.file, currentOptions, item.originalType);
+        if (item.compressedUrl) {
+          URL.revokeObjectURL(item.compressedUrl);
+        }
         const compUrl = URL.createObjectURL(result.blob);
         const ratio = Math.max(
           0,
@@ -292,6 +300,12 @@ export const CompressorStudio: React.FC = () => {
       setZipProgress(0);
     }
   };
+
+  // Keep inspectImage in sync with images array if recompressed
+  const activeInspectImage = useMemo(() => {
+    if (!inspectImage) return null;
+    return images.find((i) => i.id === inspectImage.id) || inspectImage;
+  }, [images, inspectImage]);
 
   return (
     <div className="min-h-screen flex flex-col bg-surface-base text-slate-100">
@@ -503,11 +517,11 @@ export const CompressorStudio: React.FC = () => {
 
       {/* Comparison Modal */}
       <ComparisonModal
-        image={inspectImage}
+        image={activeInspectImage}
         onClose={() => setInspectImage(null)}
         targetMime={
           options.format === "original"
-            ? inspectImage?.originalType || "image/jpeg"
+            ? activeInspectImage?.originalType || "image/jpeg"
             : options.format
         }
         dpi={options.dpi}

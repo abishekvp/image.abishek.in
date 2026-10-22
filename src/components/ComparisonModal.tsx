@@ -11,8 +11,6 @@ import {
   Split,
   Columns,
   Printer,
-  Sparkles,
-  ArrowRight,
 } from "lucide-react";
 import { ProcessedImage } from "@/types";
 import { formatBytes, getOutputFilename, getPrintDimensions, downloadBlob } from "@/lib/utils";
@@ -37,6 +35,62 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [originalSrc, setOriginalSrc] = useState<string>("");
+  const [compressedSrc, setCompressedSrc] = useState<string>("");
+
+  // Sync and manage live object URLs with fallback recovery
+  useEffect(() => {
+    if (!image) {
+      setOriginalSrc("");
+      setCompressedSrc("");
+      return;
+    }
+
+    let orig = image.originalUrl || "";
+    let comp = image.compressedUrl || "";
+    let cleanupOrig = false;
+    let cleanupComp = false;
+
+    if (!orig && image.file) {
+      orig = URL.createObjectURL(image.file);
+      cleanupOrig = true;
+    }
+    if (!comp && image.compressedBlob) {
+      comp = URL.createObjectURL(image.compressedBlob);
+      cleanupComp = true;
+    }
+
+    setOriginalSrc(orig);
+    setCompressedSrc(comp);
+
+    return () => {
+      if (cleanupOrig) URL.revokeObjectURL(orig);
+      if (cleanupComp) URL.revokeObjectURL(comp);
+    };
+  }, [image]);
+
+  const handleOriginalError = () => {
+    if (image?.file) {
+      try {
+        const freshUrl = URL.createObjectURL(image.file);
+        setOriginalSrc(freshUrl);
+      } catch (err) {
+        console.error("Failed to regenerate original image URL:", err);
+      }
+    }
+  };
+
+  const handleCompressedError = () => {
+    if (image?.compressedBlob) {
+      try {
+        const freshUrl = URL.createObjectURL(image.compressedBlob);
+        setCompressedSrc(freshUrl);
+      } catch (err) {
+        console.error("Failed to regenerate compressed image URL:", err);
+      }
+    }
+  };
+
   // Close on Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,17 +100,35 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  const updateSliderPosition = useCallback((clientX: number) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const x = clientX - rect.left;
+    const pos = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPos(pos);
+  }, []);
+
   const handlePointerMove = useCallback(
     (e: MouseEvent | TouchEvent) => {
-      if (!isDragging || !containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
+      if (!isDragging) return;
       const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-      const x = clientX - rect.left;
-      const pos = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      setSliderPos(pos);
+      updateSliderPosition(clientX);
     },
-    [isDragging]
+    [isDragging, updateSliderPosition]
   );
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    updateSliderPosition(e.clientX);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    if (e.touches.length > 0) {
+      updateSliderPosition(e.touches[0].clientX);
+    }
+  };
 
   const handlePointerUp = useCallback(() => {
     setIsDragging(false);
@@ -77,7 +149,7 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
     };
   }, [isDragging, handlePointerMove, handlePointerUp]);
 
-  if (!image || !image.compressedUrl) return null;
+  if (!image) return null;
 
   const handleDownload = () => {
     if (!image.compressedBlob) return;
@@ -110,9 +182,11 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
             <h3 className="font-bold text-base sm:text-lg text-white truncate max-w-xs sm:max-w-md lg:max-w-xl">
               {image.name}
             </h3>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono">
-              -{image.compressionRatio}% saved
-            </span>
+            {typeof image.compressionRatio === "number" && (
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono">
+                -{image.compressionRatio}% saved
+              </span>
+            )}
           </div>
 
           {/* Center: View Controls */}
@@ -206,75 +280,67 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
         </div>
 
         {/* Viewport Area */}
-        <div className="relative flex-1 bg-surface-base/95 overflow-hidden flex items-center justify-center p-4">
+        <div className="relative flex-1 bg-surface-base/95 overflow-hidden flex items-center justify-center p-4 select-none">
           {viewMode === "split" ? (
             /* Split Slider View */
-            <div
-              ref={containerRef}
-              className="relative max-w-full max-h-full select-none overflow-hidden rounded-2xl border-2 border-surface-border shadow-2xl flex items-center justify-center cursor-ew-resize"
-              onMouseDown={() => setIsDragging(true)}
-              onTouchStart={() => setIsDragging(true)}
-            >
-              {/* Zoom container */}
+            <div className="relative max-w-full max-h-full flex items-center justify-center p-2 sm:p-4 select-none">
               <div
-                className="relative transition-transform duration-75 ease-out flex items-center justify-center"
+                ref={containerRef}
+                className="relative rounded-2xl overflow-hidden border-2 border-surface-border shadow-2xl cursor-ew-resize select-none"
                 style={{
                   transform: `scale(${zoomLevel})`,
                   transformOrigin: "center center",
+                  transition: "transform 75ms ease-out",
                 }}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
               >
                 {/* 1. Base Image: Compressed (Right side) */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={image.compressedUrl}
+                  src={compressedSrc}
                   alt="Compressed"
-                  className="max-h-[76vh] max-w-full object-contain pointer-events-none block"
+                  className="max-h-[72vh] max-w-full object-contain pointer-events-none block select-none"
                   draggable={false}
+                  onError={handleCompressedError}
                 />
 
                 {/* 2. Overlay Image: Original (Left side), clipped by sliderPos */}
-                <div
-                  className="absolute inset-0 overflow-hidden pointer-events-none"
-                  style={{ width: `${sliderPos}%` }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={image.originalUrl}
-                    alt="Original"
-                    className="max-h-[76vh] max-w-none object-contain pointer-events-none"
-                    style={{
-                      width: containerRef.current
-                        ? `${containerRef.current.clientWidth}px`
-                        : "100%",
-                      height: "100%",
-                    }}
-                    draggable={false}
-                  />
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={originalSrc}
+                  alt="Original"
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none block select-none"
+                  style={{
+                    clipPath: `inset(0 ${100 - sliderPos}% 0 0)`,
+                  }}
+                  draggable={false}
+                  onError={handleOriginalError}
+                />
 
                 {/* Vertical Divider Line */}
                 <div
-                  className="absolute top-0 bottom-0 w-1 bg-white shadow-2xl pointer-events-none z-20"
+                  className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_12px_rgba(0,0,0,0.8)] pointer-events-none z-20"
                   style={{ left: `${sliderPos}%` }}
                 >
                   {/* Central Draggable Handle */}
-                  <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white text-surface-base shadow-2xl flex items-center justify-center border-2 border-brand-500 cursor-ew-resize">
-                    <Split className="w-5 h-5" />
+                  <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-white text-surface-base shadow-2xl flex items-center justify-center border-2 border-brand-500 cursor-ew-resize">
+                    <Split className="w-4 h-4 text-brand-600" />
                   </div>
                 </div>
-              </div>
 
-              {/* Floating Labels */}
-              <div className="absolute top-4 left-4 pointer-events-none z-30 px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 text-xs font-mono text-slate-200">
-                Original: <strong className="text-white">{formatBytes(image.originalSize)}</strong>
-              </div>
+                {/* Floating Labels inside image frame */}
+                <div className="absolute top-3 left-3 pointer-events-none z-30 px-3 py-1 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 text-xs font-mono text-slate-200 shadow-md">
+                  Original: <strong className="text-white">{formatBytes(image.originalSize)}</strong>
+                </div>
 
-              <div className="absolute top-4 right-4 pointer-events-none z-30 px-3.5 py-1.5 rounded-xl bg-emerald-950/85 backdrop-blur-md border border-emerald-500/40 text-xs font-mono text-emerald-300">
-                Compressed:{" "}
-                <strong className="text-white">
-                  {formatBytes(image.compressedSize || 0)}
-                </strong>{" "}
-                (-{image.compressionRatio}%)
+                <div className="absolute top-3 right-3 pointer-events-none z-30 px-3 py-1 rounded-xl bg-emerald-950/85 backdrop-blur-md border border-emerald-500/40 text-xs font-mono text-emerald-300 shadow-md">
+                  Compressed:{" "}
+                  <strong className="text-white">
+                    {formatBytes(image.compressedSize || 0)}
+                  </strong>{" "}
+                  {typeof image.compressionRatio === "number" ? `(-${image.compressionRatio}%)` : ""}
+                </div>
               </div>
             </div>
           ) : (
@@ -291,9 +357,16 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
                 <div className="flex-1 flex items-center justify-center overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={image.originalUrl}
+                    src={originalSrc}
                     alt="Original"
                     className="max-h-[66vh] max-w-full object-contain"
+                    style={{
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: "center center",
+                      transition: "transform 75ms ease-out",
+                    }}
+                    draggable={false}
+                    onError={handleOriginalError}
                   />
                 </div>
               </div>
@@ -303,16 +376,24 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
                 <div className="flex items-center justify-between pb-3 border-b border-surface-border text-xs sm:text-sm mb-3">
                   <span className="font-bold text-emerald-400">Compressed Output</span>
                   <span className="font-mono text-emerald-300">
-                    {formatBytes(image.compressedSize || 0)} (-{image.compressionRatio}%) ·{" "}
+                    {formatBytes(image.compressedSize || 0)}{" "}
+                    {typeof image.compressionRatio === "number" ? `(-${image.compressionRatio}%)` : ""} ·{" "}
                     {image.compressedWidth} × {image.compressedHeight} px
                   </span>
                 </div>
                 <div className="flex-1 flex items-center justify-center overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={image.compressedUrl}
+                    src={compressedSrc}
                     alt="Compressed"
                     className="max-h-[66vh] max-w-full object-contain"
+                    style={{
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: "center center",
+                      transition: "transform 75ms ease-out",
+                    }}
+                    draggable={false}
+                    onError={handleCompressedError}
                   />
                 </div>
               </div>

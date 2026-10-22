@@ -66,6 +66,15 @@ export const ConverterCard: React.FC<ConverterCardProps> = ({
 
   const handleCompareClick = () => {
     if (!isDone || !image.convertedBlob) return;
+    const ratio =
+      image.convertedSize && image.originalSize
+        ? Math.max(
+            0,
+            Math.round(
+              ((image.originalSize - image.convertedSize) / image.originalSize) * 100
+            )
+          )
+        : 0;
     const processedWrapper: ProcessedImage = {
       id: image.id,
       file: image.file,
@@ -82,6 +91,8 @@ export const ConverterCard: React.FC<ConverterCardProps> = ({
       compressedSize: image.convertedSize,
       compressedWidth: image.convertedWidth,
       compressedHeight: image.convertedHeight,
+      compressionRatio: ratio,
+      processingTimeMs: image.conversionTimeMs,
     };
     onCompare(processedWrapper);
   };
